@@ -24,17 +24,19 @@ export function activate(context: ExtensionContext) {
 	// If the extension is launched in debug mode then the debug server options are used
 	// Otherwise the run options are used
 	const serverOptions: ServerOptions = {
-		run: { module: serverModule, transport: TransportKind.ipc },
-		debug: {
-			module: serverModule,
-			transport: TransportKind.ipc,
-		}
+		// run: { module: serverModule, transport: TransportKind.ipc },
+		// debug: {
+		// 	module: serverModule,
+		// 	transport: TransportKind.ipc,
+		// }
+		run: { command: context.asAbsolutePath('bqls')},
+		debug: { command: context.asAbsolutePath('bqls')},
 	};
 
 	// Options to control the language client
 	const clientOptions: LanguageClientOptions = {
 		// Register the server for plain text documents
-		documentSelector: [{ scheme: 'file', language: 'plaintext' }],
+		documentSelector: [{ scheme: 'file', language: 'sql' }],
 		synchronize: {
 			// Notify the server about file changes to '.clientrc files contained in the workspace
 			fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
