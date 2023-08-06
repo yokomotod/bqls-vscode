@@ -4,7 +4,13 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from "path";
-import { ExtensionContext, workspace } from "vscode";
+import {
+  ExtensionContext,
+  ViewColumn,
+  commands,
+  window,
+  workspace,
+} from "vscode";
 
 import {
   LanguageClient,
@@ -47,6 +53,43 @@ export function activate(context: ExtensionContext) {
 
   // Start the client. This will also launch the server
   client.start();
+
+  const disposable = commands.registerCommand("bqls.executeQuery", async () => {
+    const result: { result: { columns: string[]; data: unknown[][] } } =
+      await client.sendRequest("workspace/executeCommand", {
+        command: "executeQuery",
+        arguments: [window.activeTextEditor.document.uri.toString()],
+      });
+
+    const headers = result.result.columns
+      .map((col) => `<th>${col}</th>`)
+      .join("");
+    const rows = result.result.data
+      .map(
+        (row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join("")}</tr>`
+      )
+      .join("");
+    const panel = window.createWebviewPanel(
+      "resultView",
+      "Query Result",
+      ViewColumn.One,
+      {}
+    );
+    panel.webview.html = `
+		<html lang="en">
+		<body>
+			<table border="1">
+				<thead>
+					<tr>${headers}</tr>
+				</thead>
+				<tbody>
+					${rows}
+				</tbody>
+			</table>
+		</body>
+	`;
+  });
+  context.subscriptions.push(disposable);
 }
 
 export function deactivate(): Thenable<void> | undefined {
