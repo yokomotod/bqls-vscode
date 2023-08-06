@@ -6,6 +6,7 @@
 import * as path from "path";
 import {
   ExtensionContext,
+  ProgressLocation,
   ViewColumn,
   commands,
   window,
@@ -16,6 +17,7 @@ import {
   LanguageClient,
   LanguageClientOptions,
   ServerOptions,
+  WorkDoneProgress,
 } from "vscode-languageclient/node";
 
 let client: LanguageClient;
@@ -48,11 +50,46 @@ export function activate(context: ExtensionContext) {
     },
   };
 
-  // Create the language client and start the client.
   client = new LanguageClient("bqls", "bqls", serverOptions, clientOptions);
 
-  // Start the client. This will also launch the server
-  client.start();
+  let progressTask = null;
+  let progressPromise = null;
+  client.onProgress(WorkDoneProgress.type, "execute_query", (params) => {
+    switch (params.kind) {
+      case "begin":
+        window.withProgress(
+          {
+            location: ProgressLocation.Notification,
+            title: "Execute Query",
+          },
+          (progress) => {
+            progressTask = progress;
+
+            progress.report({ message: params.message });
+
+            return new Promise((resolve) => {
+              progressPromise = resolve;
+            });
+          }
+        );
+        break;
+      case "report":
+        if (progressTask) {
+          progressTask.report({ message: params.message });
+        }
+        break;
+      case "end":
+        if (progressTask) {
+          progressTask.report({ message: params.message });
+          progressTask = null;
+        }
+        if (progressPromise) {
+          progressPromise();
+          progressPromise = null;
+        }
+        break;
+    }
+  });
 
   const disposable = commands.registerCommand("bqls.executeQuery", async () => {
     const result: { result: { columns: string[]; data: unknown[][] } } =
@@ -90,6 +127,9 @@ export function activate(context: ExtensionContext) {
 	`;
   });
   context.subscriptions.push(disposable);
+
+  // Start the client. This will also launch the server
+  client.start();
 }
 
 export function deactivate(): Thenable<void> | undefined {
