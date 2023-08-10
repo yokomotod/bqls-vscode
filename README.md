@@ -2,13 +2,31 @@
 
 build [bqls](https://github.com/kitagry/bqls) and locate into PATH.
 
+```console
+git clone https://github.com/kitagry/bqls.git
+cd bqls
+CC=clang CXX=clang++ go install .
+
+bqls -version
+```
+
 ### install
 
 ```console
+git clone https://github.com/yokomotod/bqls-vscode.git
+cd bqls-vscode
+
+npm install
 npx vsce package
 
 code --install-extension bqls-vscode-0.1.0.vsix
 ```
+
+### features
+
+* Auto Complete
+* Format
+* Command: `Execute Query`
 
 <!-- # LSP Example
 
