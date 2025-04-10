@@ -91,7 +91,7 @@ export function activate(context: ExtensionContext) {
     }
   });
 
-  const disposable = commands.registerCommand("executeQuery", async () => {
+  const disposable = commands.registerCommand("bqls.executeQuery", async () => {
     const result: { result: { columns: string[]; data: unknown[][] } } =
       await client.sendRequest("workspace/executeCommand", {
         command: "executeQuery",
