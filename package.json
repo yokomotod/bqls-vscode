@@ -39,6 +39,14 @@
           ],
           "default": "off",
           "description": "Traces the communication between VS Code and the language server."
+        },
+        "bqls.projects": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "List of BigQuery projects to display in the explorer."
         }
       }
     },

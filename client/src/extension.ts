@@ -26,13 +26,18 @@ import {
 	WorkDoneProgress,
 } from 'vscode-languageclient/node';
 
+const CONFIG_PROJECTS = 'bqls.projects';
+
+function getConfiguredProjects(): string[] {
+	const config = workspace.getConfiguration();
+	return config.get<string[]>(CONFIG_PROJECTS, []);
+}
+
 class BigQueryTreeDataProvider implements TreeDataProvider<TreeItem> {
 	private _onDidChangeTreeData: EventEmitter<TreeItem | undefined | void> =
 		new EventEmitter<TreeItem | undefined | void>();
 	readonly onDidChangeTreeData: Event<TreeItem | undefined | void> =
 		this._onDidChangeTreeData.event;
-
-	private datasets: TreeItem[] = [];
 
 	constructor(private client: LanguageClient) {
 		// Register a command to handle table clicks
@@ -51,43 +56,42 @@ class BigQueryTreeDataProvider implements TreeDataProvider<TreeItem> {
 		return element;
 	}
 
-	async getChildren(element?: TreeItem): Promise<TreeItem[]> {
-		if (!element) {
-			// Top-level: Fetch datasets
-			if (this.datasets.length === 0) {
-				await this.fetchDatasets();
-			}
-			return this.datasets;
-		}
-
-		// Fetch tables for a specific dataset
-		if (element.contextValue === 'dataset') {
-			return this.fetchTables(element.label);
-		}
-
-		return [];
+	private async fetchProjects(): Promise<TreeItem[]> {
+		const projects = getConfiguredProjects();
+		return projects.map(
+			(project) =>
+				new TreeItem(project, TreeItemCollapsibleState.Collapsed, 'project'),
+		);
 	}
 
-	private async fetchDatasets(): Promise<void> {
+	private async fetchDatasetsForProject(project: string): Promise<TreeItem[]> {
 		try {
-			const result = await this.client.sendRequest<{
-				datasets: string[];
-			}>('workspace/executeCommand', {
-				command: 'listDatasets',
-				arguments: [],
-			});
-
-			this.datasets = result.datasets.map(
-				(dataset) =>
-					new TreeItem(dataset, TreeItemCollapsibleState.Collapsed, 'dataset'),
+			const result = await this.client.sendRequest<{ datasets: string[] }>(
+				'workspace/executeCommand',
+				{
+					command: 'listDatasets',
+					arguments: [project],
+				},
 			);
-			this._onDidChangeTreeData.fire();
+
+			return result.datasets.map(
+				(dataset) =>
+					new TreeItem(
+						dataset,
+						TreeItemCollapsibleState.Collapsed,
+						'dataset',
+						project,
+					),
+			);
 		} catch (error) {
-			window.showErrorMessage(`Failed to fetch datasets: ${error.message}`);
+			window.showErrorMessage(
+				`Failed to fetch datasets for project ${project}: ${error.message}`,
+			);
+			return [];
 		}
 	}
 
-	private async fetchTables(dataset: string): Promise<TreeItem[]> {
+	private async fetchTablesForDataset(dataset: string): Promise<TreeItem[]> {
 		try {
 			const result = await this.client.sendRequest<{
 				project: string;
@@ -116,6 +120,23 @@ class BigQueryTreeDataProvider implements TreeDataProvider<TreeItem> {
 		}
 	}
 
+	async getChildren(element?: TreeItem): Promise<TreeItem[]> {
+		if (!element) {
+			// Top-level: Fetch projects
+			return this.fetchProjects();
+		}
+
+		if (element.contextValue === 'project') {
+			return this.fetchDatasetsForProject(element.label);
+		}
+
+		if (element.contextValue === 'dataset') {
+			return this.fetchTablesForDataset(element.dataset);
+		}
+
+		return [];
+	}
+
 	private async openVirtualTextDocument(uri: string): Promise<void> {
 		try {
 			await window.withProgress(
@@ -135,7 +156,6 @@ class BigQueryTreeDataProvider implements TreeDataProvider<TreeItem> {
 	}
 
 	public refresh(): void {
-		this.datasets = [];
 		this._onDidChangeTreeData.fire();
 	}
 }
