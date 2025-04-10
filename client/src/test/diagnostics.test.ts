@@ -12,9 +12,24 @@ suite('Should get diagnostics', () => {
 
 	test('Diagnoses uppercase texts', async () => {
 		await testDiagnostics(docUri, [
-			{ message: 'ANY is all uppercase.', range: toRange(0, 0, 0, 3), severity: vscode.DiagnosticSeverity.Warning, source: 'ex' },
-			{ message: 'ANY is all uppercase.', range: toRange(0, 14, 0, 17), severity: vscode.DiagnosticSeverity.Warning, source: 'ex' },
-			{ message: 'OS is all uppercase.', range: toRange(0, 18, 0, 20), severity: vscode.DiagnosticSeverity.Warning, source: 'ex' }
+			{
+				message: 'ANY is all uppercase.',
+				range: toRange(0, 0, 0, 3),
+				severity: vscode.DiagnosticSeverity.Warning,
+				source: 'ex',
+			},
+			{
+				message: 'ANY is all uppercase.',
+				range: toRange(0, 14, 0, 17),
+				severity: vscode.DiagnosticSeverity.Warning,
+				source: 'ex',
+			},
+			{
+				message: 'OS is all uppercase.',
+				range: toRange(0, 18, 0, 20),
+				severity: vscode.DiagnosticSeverity.Warning,
+				source: 'ex',
+			},
 		]);
 	});
 });
@@ -25,7 +40,10 @@ function toRange(sLine: number, sChar: number, eLine: number, eChar: number) {
 	return new vscode.Range(start, end);
 }
 
-async function testDiagnostics(docUri: vscode.Uri, expectedDiagnostics: vscode.Diagnostic[]) {
+async function testDiagnostics(
+	docUri: vscode.Uri,
+	expectedDiagnostics: vscode.Diagnostic[],
+) {
 	await activate(docUri);
 
 	const actualDiagnostics = vscode.languages.getDiagnostics(docUri);

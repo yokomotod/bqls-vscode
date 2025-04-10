@@ -24,9 +24,9 @@ code --install-extension bqls-vscode-0.1.0.vsix
 
 ### features
 
-* Auto Complete
-* Format
-* Command: `Execute Query`
+- Auto Complete
+- Format
+- Command: `Execute Query`
 
 <!-- # LSP Example
 
