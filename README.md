@@ -36,7 +36,8 @@ code --install-extension bqls-vscode-0.1.0.vsix
   - show table/column metadata
   - show function document
 - ✅ `textDocument/completion`
-- ❌ `textDocument/definition`
+- ✅ `textDocument/definition`
+  - show table information
 - 🔺 `textDocument/codeAction`
   - ✅ `executeQuery`
   - ❌ `listJobHistories`

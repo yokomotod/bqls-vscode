@@ -36,7 +36,7 @@ export function activate(context: ExtensionContext) {
 
 	// Options to control the language client
 	const clientOptions: LanguageClientOptions = {
-		// Register the server for plain text documents
+		// Register the server for sql documents
 		documentSelector: [{ language: 'sql' }],
 		synchronize: {
 			// Notify the server about file changes to '.clientrc files contained in the workspace
@@ -83,6 +83,26 @@ export function activate(context: ExtensionContext) {
 				}
 				break;
 		}
+	});
+
+	// Add a handler for bqls:// URIs to fetch and display their content
+	const bqlsScheme = 'bqls';
+	workspace.registerTextDocumentContentProvider(bqlsScheme, {
+		provideTextDocumentContent: async (uri) => {
+			const result: {
+				contents: { language: string; value: string }[];
+				result: { columns: string[]; data: unknown[][] };
+			} = await client.sendRequest('bqls/virtualTextDocument', {
+				textDocument: { uri: uri.toString() },
+			});
+			return (
+				result.contents.map((content) => content.value).join('\n') +
+				'\n' +
+				result.result.columns.join(',') +
+				'\n' +
+				result.result.data.map((row) => row.join(',')).join('\n')
+			);
+		},
 	});
 
 	const disposable = commands.registerCommand('bqls.executeQuery', async () => {
