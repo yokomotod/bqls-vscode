@@ -35,18 +35,18 @@ code --install-extension bqls-vscode-0.1.0.vsix
 - ✅ `textDocument/hover`
   - show table/column metadata
   - show function document
-- ✅ `textDocument/completion`
 - ✅ `textDocument/definition`
   - show table information
 - 🔺 `textDocument/codeAction`
   - ✅ `executeQuery`
   - ❌ `listJobHistories`
 - [workspace/executeCommand](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#workspaceexecutecommand)
-    - ✅ [executeQuery](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#executequery)
-    - ❌ [listDatasets](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#listdatasets)
-    - ❌ [listTables](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#listtables)
-    - ❌ [listJobHistories](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#listjobhistories)
-    - ❌ [saveResult](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#saveResult)
+  - ✅ [executeQuery](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#executequery)
+  - ❌ [listDatasets](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#listdatasets)
+  - ❌ [listTables](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#listtables)
+  - ❌ [listJobHistories](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#listjobhistories)
+  - ✅ [saveResult](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#saveResult)
+    - save query result to csv
 - ❌ `workspace/didChangeConfiguration`
 
 based on https://github.com/kitagry/bqls/tree/main#supported-protocol

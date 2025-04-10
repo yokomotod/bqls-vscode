@@ -126,24 +126,51 @@ export function activate(context: ExtensionContext) {
 			)
 			.join('');
 		const panel = window.createWebviewPanel(
-			'resultView',
+			'queryResult',
 			'Query Result',
 			ViewColumn.One,
-			{},
+			{
+				enableScripts: true,
+			},
 		);
+
 		panel.webview.html = `
-		<html lang="en">
-		<body>
-			<table border="1">
-				<thead>
-					<tr>${headers}</tr>
-				</thead>
-				<tbody>
-					${rows}
-				</tbody>
-			</table>
-		</body>
-	`;
+			<html lang="en">
+			<body>
+				<button id="saveResult">Save Result</button>
+				<table border="1">
+					<thead>
+						<tr>${headers}</tr>
+					</thead>
+					<tbody>
+						${rows}
+					</tbody>
+				</table>
+				<script>
+					const vscode = acquireVsCodeApi();
+					document.getElementById('saveResult').addEventListener('click', () => {
+						vscode.postMessage({ command: 'saveResult' });
+					});
+				</script>
+			</body>
+		</html>
+		`;
+
+		panel.webview.onDidReceiveMessage(async (message) => {
+			if (message.command === 'saveResult') {
+				const uri = await window.showSaveDialog({
+					saveLabel: 'Save',
+					filters: { 'CSV Files': ['csv'] },
+				});
+				if (uri) {
+					await client.sendRequest('workspace/executeCommand', {
+						command: 'saveResult',
+						arguments: [virtualTextDocument.textDocument.uri, uri.toString()],
+					});
+					window.showInformationMessage('Query result saved successfully!');
+				}
+			}
+		});
 	});
 	context.subscriptions.push(disposable);
 
