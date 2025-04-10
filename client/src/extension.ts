@@ -92,10 +92,15 @@ export function activate(context: ExtensionContext) {
 	});
 
 	const disposable = commands.registerCommand('bqls.executeQuery', async () => {
-		const result: { result: { columns: string[]; data: unknown[][] } } =
+		const virtualTextDocument: { textDocument: { uri: string } } =
 			await client.sendRequest('workspace/executeCommand', {
 				command: 'executeQuery',
 				arguments: [window.activeTextEditor.document.uri.toString()],
+			});
+
+		const result: { result: { columns: string[]; data: unknown[][] } } =
+			await client.sendRequest('bqls/virtualTextDocument', {
+				textDocument: virtualTextDocument.textDocument,
 			});
 
 		const headers = result.result.columns
