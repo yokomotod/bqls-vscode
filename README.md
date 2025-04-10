@@ -3,7 +3,7 @@
 build [bqls](https://github.com/kitagry/bqls) and locate into PATH.
 
 ```console
-git clone https://github.com/kitagry/bqls.git
+git clone https://github.com/kitagry/bqls.git -b v0.3.3
 cd bqls
 CC=clang CXX=clang++ go install .
 
@@ -27,6 +27,28 @@ code --install-extension bqls-vscode-0.1.0.vsix
 - Auto Complete
 - Format
 - Command: `Execute Query`
+
+#### `bqls` support status
+
+- ✅ `textDocument/formatting`
+  - format SQL by `zetasql.FormatSQL`
+- ✅ `textDocument/hover`
+  - show table/column metadata
+  - show function document
+- ✅ `textDocument/completion`
+- ❌ `textDocument/definition`
+- 🔺 `textDocument/codeAction`
+  - ✅ `executeQuery`
+  - ❌ `listJobHistories`
+- [workspace/executeCommand](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#workspaceexecutecommand)
+    - ✅ [executeQuery](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#executequery)
+    - ❌ [listDatasets](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#listdatasets)
+    - ❌ [listTables](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#listtables)
+    - ❌ [listJobHistories](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#listjobhistories)
+    - ❌ [saveResult](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#saveResult)
+- ❌ `workspace/didChangeConfiguration`
+
+based on https://github.com/kitagry/bqls/tree/main#supported-protocol
 
 <!--
 # LSP Example
