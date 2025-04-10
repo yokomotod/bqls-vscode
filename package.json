@@ -47,7 +47,24 @@
         "command": "bqls.executeQuery",
         "title": "Execute Query"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "bqls-vscode",
+          "title": "bqls-vscode",
+          "icon": "resources/bigquery.svg"
+        }
+      ]
+    },
+    "views": {
+      "bqls-vscode": [
+        {
+          "id": "bigQueryExplorer",
+          "name": "BigQuery Explorer"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

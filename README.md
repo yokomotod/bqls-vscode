@@ -27,6 +27,7 @@ code --install-extension bqls-vscode-0.1.0.vsix
 - Auto Complete
 - Format
 - Command: `Execute Query`
+- Table Explorer
 
 #### `bqls` support status
 
@@ -42,8 +43,8 @@ code --install-extension bqls-vscode-0.1.0.vsix
   - ❌ `listJobHistories`
 - [workspace/executeCommand](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#workspaceexecutecommand)
   - ✅ [executeQuery](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#executequery)
-  - ❌ [listDatasets](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#listdatasets)
-  - ❌ [listTables](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#listtables)
+  - ✅ [listDatasets](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#listdatasets)
+  - ✅ [listTables](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#listtables)
   - ❌ [listJobHistories](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#listjobhistories)
   - ✅ [saveResult](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#saveResult)
     - save query result to csv

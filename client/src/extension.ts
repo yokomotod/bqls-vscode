@@ -4,8 +4,13 @@
  * ------------------------------------------------------------------------------------------ */
 
 import {
+	Event,
+	EventEmitter,
 	ExtensionContext,
 	ProgressLocation,
+	TreeDataProvider,
+	TreeItem as VSCodeTreeItem,
+	TreeItemCollapsibleState,
 	Uri,
 	ViewColumn,
 	commands,
@@ -20,6 +25,140 @@ import {
 	ServerOptions,
 	WorkDoneProgress,
 } from 'vscode-languageclient/node';
+
+class BigQueryTreeDataProvider implements TreeDataProvider<TreeItem> {
+	private _onDidChangeTreeData: EventEmitter<TreeItem | undefined | void> =
+		new EventEmitter<TreeItem | undefined | void>();
+	readonly onDidChangeTreeData: Event<TreeItem | undefined | void> =
+		this._onDidChangeTreeData.event;
+
+	private datasets: TreeItem[] = [];
+
+	constructor(private client: LanguageClient) {
+		// Register a command to handle table clicks
+		commands.registerCommand(
+			'bigQueryExplorer.openTable',
+			(table: TreeItem) => {
+				if (table.contextValue === 'table') {
+					const uri = `bqls://project/${table.project}/dataset/${table.dataset}/table/${table.label}`;
+					this.openVirtualTextDocument(uri);
+				}
+			},
+		);
+	}
+
+	getTreeItem(element: TreeItem): VSCodeTreeItem {
+		return element;
+	}
+
+	async getChildren(element?: TreeItem): Promise<TreeItem[]> {
+		if (!element) {
+			// Top-level: Fetch datasets
+			if (this.datasets.length === 0) {
+				await this.fetchDatasets();
+			}
+			return this.datasets;
+		}
+
+		// Fetch tables for a specific dataset
+		if (element.contextValue === 'dataset') {
+			return this.fetchTables(element.label);
+		}
+
+		return [];
+	}
+
+	private async fetchDatasets(): Promise<void> {
+		try {
+			const result = await this.client.sendRequest<{
+				datasets: string[];
+			}>('workspace/executeCommand', {
+				command: 'listDatasets',
+				arguments: [],
+			});
+
+			this.datasets = result.datasets.map(
+				(dataset) =>
+					new TreeItem(dataset, TreeItemCollapsibleState.Collapsed, 'dataset'),
+			);
+			this._onDidChangeTreeData.fire();
+		} catch (error) {
+			window.showErrorMessage(`Failed to fetch datasets: ${error.message}`);
+		}
+	}
+
+	private async fetchTables(dataset: string): Promise<TreeItem[]> {
+		try {
+			const result = await this.client.sendRequest<{
+				project: string;
+				dataset: string;
+				tables: string[];
+			}>('workspace/executeCommand', {
+				command: 'listTables',
+				arguments: [dataset],
+			});
+
+			return result.tables.map(
+				(table) =>
+					new TreeItem(
+						table,
+						TreeItemCollapsibleState.None,
+						'table',
+						result.project,
+						result.dataset,
+					),
+			);
+		} catch (error) {
+			window.showErrorMessage(
+				`Failed to fetch tables for dataset ${dataset}: ${error.message}`,
+			);
+			return [];
+		}
+	}
+
+	private async openVirtualTextDocument(uri: string): Promise<void> {
+		try {
+			await window.withProgress(
+				{
+					location: ProgressLocation.Notification,
+					title: 'Loading table...',
+					cancellable: false,
+				},
+				async () => {
+					const document = await workspace.openTextDocument(Uri.parse(uri));
+					await window.showTextDocument(document);
+				},
+			);
+		} catch (error) {
+			window.showErrorMessage(`Failed to open table: ${error.message}`);
+		}
+	}
+
+	public refresh(): void {
+		this.datasets = [];
+		this._onDidChangeTreeData.fire();
+	}
+}
+
+class TreeItem extends VSCodeTreeItem {
+	constructor(
+		public readonly label: string,
+		public readonly collapsibleState: TreeItemCollapsibleState,
+		public readonly contextValue: string,
+		public readonly project?: string,
+		public readonly dataset?: string,
+	) {
+		super(label, collapsibleState);
+
+		if (contextValue === 'table') {
+			this.command = {
+				command: 'bigQueryExplorer.openTable',
+				title: 'Open Table',
+				arguments: [this],
+			};
+		}
+	}
+}
 
 let client: LanguageClient;
 
@@ -188,6 +327,16 @@ export function activate(context: ExtensionContext) {
 		});
 	});
 	context.subscriptions.push(disposable);
+
+	// Register the TreeDataProvider
+	const treeDataProvider = new BigQueryTreeDataProvider(client);
+	window.registerTreeDataProvider('bigQueryExplorer', treeDataProvider);
+
+	context.subscriptions.push(
+		commands.registerCommand('bigQueryExplorer.refresh', () =>
+			treeDataProvider.refresh(),
+		),
+	);
 
 	// Start the client. This will also launch the server
 	client.start();
