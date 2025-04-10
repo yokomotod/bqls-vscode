@@ -15,6 +15,8 @@ import {
 	TextDocumentPositionParams,
 	TextDocumentSyncKind,
 	InitializeResult,
+	DocumentDiagnosticReportKind,
+	type DocumentDiagnosticReport,
 } from 'vscode-languageserver/node';
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
@@ -24,7 +26,7 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 const connection = createConnection(ProposedFeatures.all);
 
 // Create a simple text document manager.
-const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
+const documents = new TextDocuments(TextDocument);
 
 let hasConfigurationCapability = false;
 let hasWorkspaceFolderCapability = false;
@@ -53,6 +55,10 @@ connection.onInitialize((params: InitializeParams) => {
 			// Tell the client that this server supports code completion.
 			completionProvider: {
 				resolveProvider: true,
+			},
+			diagnosticProvider: {
+				interFileDependencies: false,
+				workspaceDiagnostics: false,
 			},
 		},
 	};
@@ -93,18 +99,19 @@ const defaultSettings: ExampleSettings = { maxNumberOfProblems: 1000 };
 let globalSettings: ExampleSettings = defaultSettings;
 
 // Cache the settings of all open documents
-const documentSettings: Map<string, Thenable<ExampleSettings>> = new Map();
+const documentSettings = new Map<string, Thenable<ExampleSettings>>();
 
 connection.onDidChangeConfiguration((change) => {
 	if (hasConfigurationCapability) {
 		// Reset all cached document settings
 		documentSettings.clear();
 	} else {
-		globalSettings = <ExampleSettings>(change.settings.bqls || defaultSettings);
+		globalSettings = change.settings.languageServerExample || defaultSettings;
 	}
-
-	// Revalidate all open text documents
-	documents.all().forEach(validateTextDocument);
+	// Refresh the diagnostics since the `maxNumberOfProblems` could have changed.
+	// We could optimize things here and re-fetch the setting first can compare it
+	// to the existing setting, but this is out of scope for this example.
+	connection.languages.diagnostics.refresh();
 });
 
 function getDocumentSettings(resource: string): Thenable<ExampleSettings> {
@@ -115,7 +122,7 @@ function getDocumentSettings(resource: string): Thenable<ExampleSettings> {
 	if (!result) {
 		result = connection.workspace.getConfiguration({
 			scopeUri: resource,
-			section: 'bqls',
+			section: 'languageServerExample',
 		});
 		documentSettings.set(resource, result);
 	}
@@ -127,13 +134,32 @@ documents.onDidClose((e) => {
 	documentSettings.delete(e.document.uri);
 });
 
+connection.languages.diagnostics.on(async (params) => {
+	const document = documents.get(params.textDocument.uri);
+	if (document !== undefined) {
+		return {
+			kind: DocumentDiagnosticReportKind.Full,
+			items: await validateTextDocument(document),
+		} satisfies DocumentDiagnosticReport;
+	} else {
+		// We don't know the document. We can either try to read it from disk
+		// or we don't report problems for it.
+		return {
+			kind: DocumentDiagnosticReportKind.Full,
+			items: [],
+		} satisfies DocumentDiagnosticReport;
+	}
+});
+
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent((change) => {
 	validateTextDocument(change.document);
 });
 
-async function validateTextDocument(textDocument: TextDocument): Promise<void> {
+async function validateTextDocument(
+	textDocument: TextDocument,
+): Promise<Diagnostic[]> {
 	// In this simple example we get the settings for every validate run.
 	const settings = await getDocumentSettings(textDocument.uri);
 
@@ -175,14 +201,12 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 		}
 		diagnostics.push(diagnostic);
 	}
-
-	// Send the computed diagnostics to VSCode.
-	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
+	return diagnostics;
 }
 
 connection.onDidChangeWatchedFiles((_change) => {
 	// Monitored files have change in VSCode
-	connection.console.log('We received an file change event');
+	connection.console.log('We received a file change event');
 });
 
 // This handler provides the initial list of the completion items.
