@@ -47,6 +47,7 @@ code --install-extension bqls-vscode-0.1.0.vsix
   - ❌ [listJobHistories](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#listjobhistories)
   - ✅ [saveResult](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#saveResult)
     - save query result to csv
+    - save query result to google spreadsheet
 - ❌ `workspace/didChangeConfiguration`
 
 based on https://github.com/kitagry/bqls/tree/main#supported-protocol

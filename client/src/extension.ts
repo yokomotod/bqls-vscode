@@ -6,8 +6,10 @@
 import {
 	ExtensionContext,
 	ProgressLocation,
+	Uri,
 	ViewColumn,
 	commands,
+	env,
 	window,
 	workspace,
 } from 'vscode';
@@ -137,7 +139,8 @@ export function activate(context: ExtensionContext) {
 		panel.webview.html = `
 			<html lang="en">
 			<body>
-				<button id="saveResult">Save Result</button>
+				<button id="saveToCsv">Save to CSV</button>
+				<button id="saveToSpreadsheet">Save to Spreadsheet</button>
 				<table border="1">
 					<thead>
 						<tr>${headers}</tr>
@@ -148,8 +151,11 @@ export function activate(context: ExtensionContext) {
 				</table>
 				<script>
 					const vscode = acquireVsCodeApi();
-					document.getElementById('saveResult').addEventListener('click', () => {
-						vscode.postMessage({ command: 'saveResult' });
+					document.getElementById('saveToCsv').addEventListener('click', () => {
+						vscode.postMessage({ command: 'saveToCsv' });
+						});
+					document.getElementById('saveToSpreadsheet').addEventListener('click', () => {
+						vscode.postMessage({ command: 'saveToSpreadsheet' });
 					});
 				</script>
 			</body>
@@ -157,7 +163,7 @@ export function activate(context: ExtensionContext) {
 		`;
 
 		panel.webview.onDidReceiveMessage(async (message) => {
-			if (message.command === 'saveResult') {
+			if (message.command === 'saveToCsv') {
 				const uri = await window.showSaveDialog({
 					saveLabel: 'Save',
 					filters: { 'CSV Files': ['csv'] },
@@ -169,6 +175,15 @@ export function activate(context: ExtensionContext) {
 					});
 					window.showInformationMessage('Query result saved successfully!');
 				}
+			} else if (message.command === 'saveToSpreadsheet') {
+				const result: { url: string } = await client.sendRequest(
+					'workspace/executeCommand',
+					{
+						command: 'saveResult',
+						arguments: [virtualTextDocument.textDocument.uri, 'sheet://new'],
+					},
+				);
+				await env.openExternal(Uri.parse(result.url));
 			}
 		});
 	});
