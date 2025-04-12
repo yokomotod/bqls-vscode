@@ -14,10 +14,10 @@ export function buildBqlsProvider(
 ): TextDocumentContentProvider {
 	return {
 		provideTextDocumentContent: async (uri) => {
-			const result: {
+			const result = await client.sendRequest<{
 				contents: { language: string; value: string }[];
 				result: { columns: string[]; data: unknown[][] };
-			} = await client.sendRequest(BQLS_METHOD_VIRTUAL_TEXT_DOCUMENT, {
+			}>(BQLS_METHOD_VIRTUAL_TEXT_DOCUMENT, {
 				textDocument: { uri: uri.toString() },
 			});
 			return (

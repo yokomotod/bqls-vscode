@@ -15,16 +15,18 @@ const COMMAND_SAVE_TO_SPREADSHEET = 'saveToSpreadsheet';
 
 export function buildExecuteQueryFunction(client: LanguageClient) {
 	return async () => {
-		const virtualTextDocument: { textDocument: { uri: string } } =
-			await client.sendRequest(ExecuteCommandRequest.method, {
-				command: BQLS_COMMANDS.EXECUTE_QUERY,
-				arguments: [window.activeTextEditor.document.uri.toString()],
-			});
+		const virtualTextDocument = await client.sendRequest<{
+			textDocument: { uri: string };
+		}>(ExecuteCommandRequest.method, {
+			command: BQLS_COMMANDS.EXECUTE_QUERY,
+			arguments: [window.activeTextEditor.document.uri.toString()],
+		});
 
-		const result: { result: { columns: string[]; data: unknown[][] } } =
-			await client.sendRequest(BQLS_METHOD_VIRTUAL_TEXT_DOCUMENT, {
-				textDocument: virtualTextDocument.textDocument,
-			});
+		const result = await client.sendRequest<{
+			result: { columns: string[]; data: unknown[][] };
+		}>(BQLS_METHOD_VIRTUAL_TEXT_DOCUMENT, {
+			textDocument: virtualTextDocument.textDocument,
+		});
 
 		const headers = result.result.columns
 			.map((col) => `<th>${col}</th>`)
@@ -83,7 +85,7 @@ export function buildExecuteQueryFunction(client: LanguageClient) {
 					window.showInformationMessage('Query result saved successfully!');
 				}
 			} else if (message.command === COMMAND_SAVE_TO_SPREADSHEET) {
-				const result: { url: string } = await client.sendRequest(
+				const result = await client.sendRequest<{ url: string }>(
 					ExecuteCommandRequest.method,
 					{
 						command: BQLS_COMMANDS.SAVE_RESULT,
