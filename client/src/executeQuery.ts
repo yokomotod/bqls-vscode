@@ -6,6 +6,7 @@
 import { Uri, ViewColumn, env, window } from 'vscode';
 import {
 	ExecuteCommandRequest,
+	ExecuteCommandSignature,
 	LanguageClient,
 } from 'vscode-languageclient/node';
 import { BQLS_COMMANDS, BQLS_METHOD_VIRTUAL_TEXT_DOCUMENT } from './constants';
@@ -18,27 +19,25 @@ interface Result {
 	data: unknown[][];
 }
 
-export function buildExecuteQueryFunction(client: LanguageClient) {
-	return async () => {
-		const virtualTextDocument = await client.sendRequest<{
-			textDocument: { uri: string };
-		}>(ExecuteCommandRequest.method, {
-			command: BQLS_COMMANDS.EXECUTE_QUERY,
-			arguments: [window.activeTextEditor.document.uri.toString()],
-		});
+export async function executeQueryMiddleware(
+	client: LanguageClient,
+	command: string,
+	args: unknown[],
+	next: ExecuteCommandSignature,
+) {
+	if (args.length === 0) {
+		// from command palette
+		args = [window.activeTextEditor.document.uri.toString()];
+	}
 
-		const res = await client.sendRequest<{
-			result: Result;
-		}>(BQLS_METHOD_VIRTUAL_TEXT_DOCUMENT, {
-			textDocument: virtualTextDocument.textDocument,
-		});
+	const virtualTextDocument = await next(command, args);
+	const res = await client.sendRequest<{
+		result: Result;
+	}>(BQLS_METHOD_VIRTUAL_TEXT_DOCUMENT, {
+		textDocument: virtualTextDocument.textDocument,
+	});
 
-		createWebviewPanel(
-			client,
-			virtualTextDocument.textDocument.uri,
-			res.result,
-		);
-	};
+	createWebviewPanel(client, virtualTextDocument.textDocument.uri, res.result);
 }
 
 function createWebviewPanel(

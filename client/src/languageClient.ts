@@ -3,16 +3,25 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import { ProgressLocation, window, workspace } from 'vscode';
+import { ProgressLocation, ProviderResult, window, workspace } from 'vscode';
 
 import {
+	ExecuteCommandSignature,
 	LanguageClient,
 	LanguageClientOptions,
 	ServerOptions,
 	WorkDoneProgress,
 } from 'vscode-languageclient/node';
+import { BQLS_COMMANDS } from './constants';
 
-export function initializeLanguageClient(): LanguageClient {
+export function initializeLanguageClient(
+	executeQueryMiddleware: (
+		client: LanguageClient,
+		command: string,
+		args: unknown[],
+		next: ExecuteCommandSignature,
+	) => ProviderResult<void>,
+): LanguageClient {
 	// If the extension is launched in debug mode then the debug server options are used
 	// Otherwise the run options are used
 	const serverOptions: ServerOptions = {
@@ -27,6 +36,16 @@ export function initializeLanguageClient(): LanguageClient {
 		synchronize: {
 			// Notify the server about file changes to '.clientrc files contained in the workspace
 			fileEvents: workspace.createFileSystemWatcher('**/.clientrc'),
+		},
+		middleware: {
+			executeCommand: (command, args, next) => {
+				switch (command) {
+					case BQLS_COMMANDS.EXECUTE_QUERY:
+						return executeQueryMiddleware(client, command, args, next);
+					default:
+						return next(command, args);
+				}
+			},
 		},
 	};
 
