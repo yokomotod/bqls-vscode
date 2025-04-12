@@ -12,11 +12,12 @@ import {
 	window,
 	workspace,
 } from 'vscode';
-
-import { LanguageClient } from 'vscode-languageclient/node';
+import {
+	ExecuteCommandRequest,
+	LanguageClient,
+} from 'vscode-languageclient/node';
 import { BQLS_SCHEME } from './virtualDocument';
-
-const CONFIG_PROJECTS = 'bqls.projects';
+import { BQLS_COMMANDS, CONFIG_PROJECTS, LOCAL_COMMANDS } from './constants';
 
 function getConfiguredProjects(): string[] {
 	const config = workspace.getConfiguration();
@@ -58,9 +59,9 @@ export class BigQueryTreeDataProvider implements TreeDataProvider<TreeItem> {
 	private async fetchDatasetsForProject(project: string): Promise<TreeItem[]> {
 		try {
 			const result = await this.client.sendRequest<{ datasets: string[] }>(
-				'workspace/executeCommand',
+				ExecuteCommandRequest.method,
 				{
-					command: 'listDatasets',
+					command: BQLS_COMMANDS.LIST_DATASETS,
 					arguments: [project],
 				},
 			);
@@ -91,8 +92,8 @@ export class BigQueryTreeDataProvider implements TreeDataProvider<TreeItem> {
 				project: string;
 				dataset: string;
 				tables: string[];
-			}>('workspace/executeCommand', {
-				command: 'listTables',
+			}>(ExecuteCommandRequest.method, {
+				command: BQLS_COMMANDS.LIST_TABLES,
 				arguments: [project, dataset],
 			});
 
@@ -127,7 +128,7 @@ export class TreeItem extends VSCodeTreeItem {
 
 		if (contextValue === 'table') {
 			this.command = {
-				command: 'bqls.explorer.openTable',
+				command: LOCAL_COMMANDS.OPEN_TABLE,
 				title: 'Open Table',
 				arguments: [this],
 			};

@@ -5,6 +5,7 @@
 
 import { TextDocumentContentProvider } from 'vscode';
 import { LanguageClient } from 'vscode-languageclient/node';
+import { BQLS_METHOD_VIRTUAL_TEXT_DOCUMENT } from './constants';
 
 export const BQLS_SCHEME = 'bqls';
 
@@ -16,7 +17,7 @@ export function buildBqlsProvider(
 			const result: {
 				contents: { language: string; value: string }[];
 				result: { columns: string[]; data: unknown[][] };
-			} = await client.sendRequest('bqls/virtualTextDocument', {
+			} = await client.sendRequest(BQLS_METHOD_VIRTUAL_TEXT_DOCUMENT, {
 				textDocument: { uri: uri.toString() },
 			});
 			return (

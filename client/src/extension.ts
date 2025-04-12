@@ -11,6 +11,11 @@ import { buildExecuteQueryFunction } from './executeQuery';
 import { initializeLanguageClient } from './languageClient';
 import { BigQueryTreeDataProvider, openTable } from './treeView';
 import { BQLS_SCHEME, buildBqlsProvider } from './virtualDocument';
+import {
+	EXECUTE_QUERY_COMMAND,
+	EXPLORER_VIEW_ID,
+	LOCAL_COMMANDS,
+} from './constants';
 
 let client: LanguageClient;
 
@@ -23,16 +28,16 @@ export function activate(context: ExtensionContext) {
 	);
 
 	window.registerTreeDataProvider(
-		'bqls.explorer',
+		EXPLORER_VIEW_ID,
 		new BigQueryTreeDataProvider(client),
 	);
 	context.subscriptions.push(
-		commands.registerCommand('bqls.explorer.openTable', openTable),
+		commands.registerCommand(LOCAL_COMMANDS.OPEN_TABLE, openTable),
 	);
 
 	context.subscriptions.push(
 		commands.registerCommand(
-			'bqls.executeQuery',
+			EXECUTE_QUERY_COMMAND,
 			buildExecuteQueryFunction(client),
 		),
 	);
