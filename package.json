@@ -42,16 +42,16 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "bqls-vscode",
-          "title": "bqls-vscode",
+          "id": "bqls",
+          "title": "bqls",
           "icon": "resources/bigquery.svg"
         }
       ]
     },
     "views": {
-      "bqls-vscode": [
+      "bqls": [
         {
-          "id": "bigQueryExplorer",
+          "id": "bqls.explorer",
           "name": "BigQuery Explorer"
         }
       ]
