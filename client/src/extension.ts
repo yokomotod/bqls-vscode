@@ -91,7 +91,10 @@ class BigQueryTreeDataProvider implements TreeDataProvider<TreeItem> {
 		}
 	}
 
-	private async fetchTablesForDataset(dataset: string): Promise<TreeItem[]> {
+	private async fetchTablesForDataset(
+		project: string,
+		dataset: string,
+	): Promise<TreeItem[]> {
 		try {
 			const result = await this.client.sendRequest<{
 				project: string;
@@ -99,7 +102,7 @@ class BigQueryTreeDataProvider implements TreeDataProvider<TreeItem> {
 				tables: string[];
 			}>('workspace/executeCommand', {
 				command: 'listTables',
-				arguments: [dataset],
+				arguments: [project, dataset],
 			});
 
 			return result.tables.map(
@@ -131,7 +134,7 @@ class BigQueryTreeDataProvider implements TreeDataProvider<TreeItem> {
 		}
 
 		if (element.contextValue === 'dataset') {
-			return this.fetchTablesForDataset(element.dataset);
+			return this.fetchTablesForDataset(element.project!, element.label);
 		}
 
 		return [];
