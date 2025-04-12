@@ -28,7 +28,7 @@
           "items": {
             "type": "string"
           },
-          "default": [],
+          "default": ["bigquery-public-data"],
           "description": "List of BigQuery projects to display in the explorer."
         }
       }
