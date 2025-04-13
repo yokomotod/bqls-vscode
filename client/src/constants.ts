@@ -22,9 +22,11 @@ export const BQLS_COMMANDS = {
 };
 export const BQLS_METHOD_VIRTUAL_TEXT_DOCUMENT = 'bqls/virtualTextDocument';
 
+export const BQLS_SCHEME = 'bqls';
+
 /*
  * local commands
  */
 export const LOCAL_COMMANDS = {
-	OPEN_TABLE: 'bqls.explorer.openTable',
+	CREATE_TABLE_WEBVIEW: 'bqls.createTableWebview',
 };

@@ -4,10 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 
 import {
-	ProgressLocation,
 	TreeDataProvider,
 	TreeItemCollapsibleState,
-	Uri,
 	TreeItem as VSCodeTreeItem,
 	window,
 	workspace,
@@ -16,7 +14,6 @@ import {
 	ExecuteCommandRequest,
 	LanguageClient,
 } from 'vscode-languageclient/node';
-import { BQLS_SCHEME } from './virtualDocument';
 import { BQLS_COMMANDS, CONFIG_PROJECTS, LOCAL_COMMANDS } from './constants';
 
 function getConfiguredProjects(): string[] {
@@ -103,8 +100,8 @@ export class BigQueryTreeDataProvider implements TreeDataProvider<TreeItem> {
 						table,
 						TreeItemCollapsibleState.None,
 						'table',
-						result.project,
-						result.dataset,
+						project,
+						dataset,
 					),
 			);
 		} catch (error) {
@@ -128,30 +125,10 @@ export class TreeItem extends VSCodeTreeItem {
 
 		if (contextValue === 'table') {
 			this.command = {
-				command: LOCAL_COMMANDS.OPEN_TABLE,
+				command: LOCAL_COMMANDS.CREATE_TABLE_WEBVIEW,
 				title: 'Open Table',
-				arguments: [this],
+				arguments: [this.project, this.dataset, this.label],
 			};
 		}
-	}
-}
-
-export async function openTable(table: TreeItem) {
-	const uri = `${BQLS_SCHEME}://project/${table.project}/dataset/${table.dataset}/table/${table.label}`;
-
-	try {
-		await window.withProgress(
-			{
-				location: ProgressLocation.Notification,
-				title: 'Loading table...',
-				cancellable: false,
-			},
-			async () => {
-				const document = await workspace.openTextDocument(Uri.parse(uri));
-				await window.showTextDocument(document);
-			},
-		);
-	} catch (error) {
-		window.showErrorMessage(`Failed to open table: ${error.message}`);
 	}
 }

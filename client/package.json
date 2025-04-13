@@ -14,7 +14,9 @@
 	},
 	"dependencies": {
 		"glob": "^11.0.0",
-		"vscode-languageclient": "^9.0.1"
+		"marked": "^15.0.8",
+		"vscode-languageclient": "^9.0.1",
+		"yaml": "^2.7.1"
 	},
 	"devDependencies": {
 		"@types/vscode": "^1.75.1",

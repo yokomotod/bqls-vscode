@@ -7,28 +7,35 @@
 import { commands, ExtensionContext, window, workspace } from 'vscode';
 
 import { LanguageClient } from 'vscode-languageclient/node';
-import { EXPLORER_VIEW_ID, LOCAL_COMMANDS } from './constants';
+import { BQLS_SCHEME, EXPLORER_VIEW_ID, LOCAL_COMMANDS } from './constants';
+import { BqlsTextDocumentContentProvider } from './content_provider';
 import { executeQueryMiddleware } from './executeQuery';
 import { initializeLanguageClient } from './languageClient';
-import { BigQueryTreeDataProvider, openTable } from './treeView';
-import { BQLS_SCHEME, buildBqlsProvider } from './virtualDocument';
+import { BigQueryTreeDataProvider } from './treeView';
+import { buildTableWebviewCommand } from './webView';
 
 let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
 	client = initializeLanguageClient(executeQueryMiddleware);
 
-	workspace.registerTextDocumentContentProvider(
-		BQLS_SCHEME,
-		buildBqlsProvider(client),
+	context.subscriptions.push(
+		commands.registerCommand(
+			LOCAL_COMMANDS.CREATE_TABLE_WEBVIEW,
+			buildTableWebviewCommand(client),
+		),
+	);
+
+	context.subscriptions.push(
+		workspace.registerTextDocumentContentProvider(
+			BQLS_SCHEME,
+			new BqlsTextDocumentContentProvider(),
+		),
 	);
 
 	window.registerTreeDataProvider(
 		EXPLORER_VIEW_ID,
 		new BigQueryTreeDataProvider(client),
-	);
-	context.subscriptions.push(
-		commands.registerCommand(LOCAL_COMMANDS.OPEN_TABLE, openTable),
 	);
 
 	client.start();
