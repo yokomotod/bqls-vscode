@@ -35,7 +35,7 @@
     },
     "commands": [
       {
-        "command": "executeQuery",
+        "command": "bqls.executeQuery",
         "title": "bqls: Execute Query"
       }
     ],

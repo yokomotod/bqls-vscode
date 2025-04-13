@@ -7,7 +7,6 @@
  * package.json constants
  */
 export const CONFIG_PROJECTS = 'bqls.projects';
-export const EXECUTE_QUERY_COMMAND = 'bqls.executeQuery';
 export const EXPLORER_VIEW_ID = 'bqls.explorer';
 
 /*
@@ -15,10 +14,10 @@ export const EXPLORER_VIEW_ID = 'bqls.explorer';
  */
 export const BQLS_COMMANDS = {
 	// workspace/executeCommand
-	EXECUTE_QUERY: 'executeQuery',
-	LIST_DATASETS: 'listDatasets',
-	LIST_TABLES: 'listTables',
-	SAVE_RESULT: 'saveResult',
+	EXECUTE_QUERY: 'bqls.executeQuery',
+	LIST_DATASETS: 'bqls.listDatasets',
+	LIST_TABLES: 'bqls.listTables',
+	SAVE_RESULT: 'bqls.saveResult',
 };
 export const BQLS_METHOD_VIRTUAL_TEXT_DOCUMENT = 'bqls/virtualTextDocument';
 

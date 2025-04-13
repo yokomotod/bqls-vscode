@@ -43,12 +43,12 @@ Function
 
 ### prerequisite: install bqls
 
-download from https://github.com/kitagry/bqls/releases/tag/v0.3.3 and place it into PATH
+download from https://github.com/kitagry/bqls/releases/tag/v0.4.0 and place it into PATH
 
 or else, build from source
 
 ```console
-CC=clang CXX=clang++ go install github.com/kitagry/bqls@v0.3.3
+CC=clang CXX=clang++ go install github.com/kitagry/bqls@v0.4.0
 ```
 
 check
@@ -87,14 +87,14 @@ code --install-extension bqls-vscode-0.1.0.vsix
 - ✅ `textDocument/definition`
   - show table information
 - 🔺 `textDocument/codeAction`
-  - ✅ `executeQuery`
-  - ❌ `listJobHistories`
-- [workspace/executeCommand](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#workspaceexecutecommand)
-  - ✅ [executeQuery](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#executequery)
-  - ✅ [listDatasets](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#listdatasets)
-  - ✅ [listTables](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#listtables)
-  - ❌ [listJobHistories](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#listjobhistories)
-  - ✅ [saveResult](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#saveResult)
+  - ✅ `bqls.executeQuery`
+  - ❌ `bqls.listJobHistories`
+- [workspace/executeCommand](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#bqlsworkspaceexecutecommand)
+  - ✅ [bqls.executeQuery](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#bqlsexecutequery)
+  - ✅ [bqls.listDatasets](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#bqlslistdatasets)
+  - ✅ [bqls.listTables](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#bqlslisttables)
+  - ❌ [bqls.listJobHistories](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#bqlslistjobhistories)
+  - ✅ [bqls.saveResult](https://github.com/kitagry/bqls/blob/main/docs/api_reference.md#bqlssaveresult)
     - save query result to csv
     - save query result to google spreadsheet
 - ❌ `workspace/didChangeConfiguration`
