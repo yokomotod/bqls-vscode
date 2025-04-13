@@ -4,11 +4,10 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import { commands, ExtensionContext, window, workspace } from 'vscode';
+import { commands, ExtensionContext, window } from 'vscode';
 
 import { LanguageClient } from 'vscode-languageclient/node';
-import { BQLS_SCHEME, EXPLORER_VIEW_ID, LOCAL_COMMANDS } from './constants';
-import { BqlsTextDocumentContentProvider } from './content_provider';
+import { EXPLORER_VIEW_ID, LOCAL_COMMANDS } from './constants';
 import { executeQueryMiddleware } from './executeQuery';
 import { initializeLanguageClient } from './languageClient';
 import { BigQueryTreeDataProvider } from './treeView';
@@ -23,13 +22,6 @@ export function activate(context: ExtensionContext) {
 		commands.registerCommand(
 			LOCAL_COMMANDS.CREATE_TABLE_WEBVIEW,
 			buildTableWebviewCommand(client),
-		),
-	);
-
-	context.subscriptions.push(
-		workspace.registerTextDocumentContentProvider(
-			BQLS_SCHEME,
-			new BqlsTextDocumentContentProvider(),
 		),
 	);
 

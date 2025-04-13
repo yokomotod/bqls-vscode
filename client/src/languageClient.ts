@@ -13,6 +13,7 @@ import {
 	WorkDoneProgress,
 } from 'vscode-languageclient/node';
 import { BQLS_COMMANDS } from './constants';
+import { provideDefinition } from './provideDefinition';
 
 export function initializeLanguageClient(
 	executeQueryMiddleware: (
@@ -46,6 +47,7 @@ export function initializeLanguageClient(
 						return next(command, args);
 				}
 			},
+			provideDefinition,
 		},
 	};
 
