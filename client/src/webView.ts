@@ -113,7 +113,7 @@ export function createQueryResultWebview(
 	const panel = window.createWebviewPanel(
 		'bqls.queryResult',
 		'Query Result',
-		ViewColumn.One,
+		ViewColumn.Beside,
 		{
 			enableScripts: true,
 		},
