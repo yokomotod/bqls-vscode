@@ -159,11 +159,17 @@ ${renderDataTableHtml(result.columns, result.data)}
 				window.showInformationMessage('Query result saved successfully!');
 			}
 		} else if (message.command === COMMAND_SAVE_TO_SPREADSHEET) {
+			const spreadsheetUrl = await window.showInputBox({
+				prompt: 'Enter Google Spreadsheet URL (leave empty to create new)',
+				placeHolder: 'https://docs.google.com/spreadsheets/d/...',
+			});
+			
+			const targetUrl = spreadsheetUrl || 'sheet://new';
 			const result = await client.sendRequest<{ url: string }>(
 				ExecuteCommandRequest.method,
 				{
 					command: BQLS_COMMANDS.SAVE_RESULT,
-					arguments: [jobUri, 'sheet://new'],
+					arguments: [jobUri, targetUrl],
 				},
 			);
 			await env.openExternal(Uri.parse(result.url));
